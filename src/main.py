@@ -227,7 +227,7 @@ class App:
     def _fill_demo(self):
         self.input.insert("1.0", """(* comment *)
 a, b, c : integer;
-x, y : real;
+x, y, z: real;
 bool_var, flag : boolean;
                           
 binnum, octnum, hexnum : integer;
@@ -238,6 +238,10 @@ exprealnum : real;
 a = 10
 b = 20
 let c = a plus b
+                          
+x = 10.5
+y = 5.1
+let z = x div y
                           
 binnum = 1010b
 octnum = 12o

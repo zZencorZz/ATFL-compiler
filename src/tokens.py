@@ -45,8 +45,8 @@ SEPARATORS = [
     '=',
     '(*',
     '*)',
-    ' ',
-    '\n',
+    ' ',    # Элемент модельного языка
+    '\n',   # Элемент модельного языка
 ]
 
 LETTER_SEPARATORS = [sep for sep in SEPARATORS if sep.isalpha()]

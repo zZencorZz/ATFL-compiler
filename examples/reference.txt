@@ -1,0 +1,56 @@
+(* comment *)
+a, b, c : integer;
+x, y, z: real;
+bool_var, flag : boolean;
+                          
+binnum, octnum, hexnum : integer;
+                          
+expintnum : integer;
+exprealnum : real;
+                          
+a = 10
+b = 20
+let c = a plus b
+                          
+x = 10.5
+y = 5.1
+let z = x div y
+                          
+binnum = 1010b
+octnum = 12o
+hexnum = 1ACh
+                          
+expintnum = 1E3
+exprealnum = 3.14E2
+
+x = 3.14
+y = x mult 2.0
+
+flag = true
+bool_var = ~flag 
+
+if a LT b then
+{
+    output(a min b);
+    (* comment *)
+    flag = false
+}
+else
+{
+    input(a b);
+    output(a plus b)
+}
+end_else
+for (a ; b ; c)
+{
+    x = x div 2.0
+}
+
+do while flag
+{
+    a = a min 1
+}
+loop
+(* comment *)
+output(flag)
+end

@@ -263,6 +263,8 @@ class Parser:
             right = self.unary()
             if left['type'] != right['type']:
                 raise SemanticError(op.line, f"Несовпадение типов в операции умножения: '{left['type']}' и '{right['type']}'")
+            if op.value == 'div' and (left['type'] == 'integer' and right['type'] == 'integer'):
+                raise SemanticError(op.line, "Операция 'div' недопустима для integer")
             left = {'type': left['type'], 'value': f"{left['value']} {op.value} {right['value']}"}
         return left
     
