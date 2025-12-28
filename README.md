@@ -29,7 +29,7 @@ python main.py
 ```text
 app/
 ├── model_lang/
-│   ├── diagrams.drawio     # Диаграммы вирты и блок схемы
+│   ├── diagrams.drawio     # Диаграммы вирта и блок схемы
 │   └── BNF.txt             # Формы Бэкуса-Наура
 ├── examples/
 │   ├── reference.txt       # Эталонный пример программы
