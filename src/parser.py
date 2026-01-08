@@ -15,7 +15,7 @@ class Context:
         peek_pos = self.pos + offset
         return self.tokens[peek_pos] if peek_pos < len(self.tokens) else None
 
-    def consume(self, type: str, value: Optional[str] = None, skip: bool = True):
+    def consume(self, type: str, value: Optional[str] = None):
         current_token = self.current()
         if not current_token:
             raise SyntaxError(0, "Неожиданный конец файла")
@@ -38,12 +38,12 @@ class Context:
     
     def declare_symbol(self, name: str, type: str):
         if name in self.symbols:
-            raise SemanticError(f"Переменная '{name}' уже объявлена")
+            raise SemanticError(0, f"Переменная '{name}' уже объявлена")
         self.symbols[name] = type
 
     def get_type(self, name: str):
         if name not in self.symbols:
-            raise SemanticError(f"Переменная '{name}' не объявлена")
+            raise SemanticError(0, f"Переменная '{name}' не объявлена")
         return self.symbols[name]
     
     def peek_non_layout(self, start_offset=0):
@@ -61,25 +61,24 @@ class Parser:
     # <программа>::={/ (<описание> | <оператор>) ( : | переход строки) /} end
     def program(self):
         self.ctx.skip_layout()
-        while True:
-            if self.ctx.current() and self.ctx.current().value == '(*':
+        while self.ctx.current() and self.ctx.current().value != 'end':
+
+            if self.ctx.current().value == '(*':
+                start_token = self.ctx.current()
                 while self.ctx.current() and self.ctx.current().value != '*)':
                     self.ctx.pos += 1
-                if self.ctx.current() and self.ctx.current().value == '*)':
-                    self.ctx.pos += 1
-                self.ctx.skip_layout()
-                continue
-
-            if not self.ctx.current() or self.ctx.current().value == 'end':
-                break
+                    if self.ctx.current() and self.ctx.current().value == '*)':
+                        self.ctx.pos += 1
+                    else:
+                        raise SyntaxError(start_token.line, "Не закрытый комментарий")
 
             if self.is_declaration():
                 self.declaration()
             else:
                 self.operator()
-            
+
             self.ctx.skip_layout()
-              
+
         self.ctx.consume(TokenType.KEYWORD.value, 'end')
 
     def is_declaration(self):
@@ -164,17 +163,23 @@ class Parser:
         self.ctx.consume(TokenType.SEPARATOR.value, '(')
         if self.ctx.current() and self.ctx.current().value != ';':
             self.ctx.skip_layout()
-            self.expression()
+            expr = self.expression()
+            if expr['type'] != 'integer':
+                raise SemanticError(self.ctx.current().line, f"Параметры for должны быть целочисленными, получен тип '{expr['type']}'")
             self.ctx.skip_layout()
         self.ctx.consume(TokenType.SEPARATOR.value, ';')
         if self.ctx.current() and self.ctx.current().value != ';':
             self.ctx.skip_layout()
-            self.expression()
+            expr = self.expression()
+            if expr['type'] != 'integer':
+                raise SemanticError(self.ctx.current().line, f"Параметры for должны быть целочисленными, получен тип '{expr['type']}'")
             self.ctx.skip_layout()
         self.ctx.consume(TokenType.SEPARATOR.value, ';')
         if self.ctx.current() and self.ctx.current().value != ')':
             self.ctx.skip_layout()
-            self.expression()
+            expr = self.expression()
+            if expr['type'] != 'integer':
+                raise SemanticError(self.ctx.current().line, f"Параметры for должны быть целочисленными, получен тип '{expr['type']}'")
             self.ctx.skip_layout()
         self.ctx.consume(TokenType.SEPARATOR.value, ')')
         self.operator()
@@ -185,7 +190,9 @@ class Parser:
         self.ctx.skip_layout()
         self.ctx.consume(TokenType.KEYWORD.value, 'while')
         self.ctx.skip_layout()
-        self.expression()
+        cond = self.expression()
+        if cond['type'] != 'boolean':
+            raise SemanticError(self.ctx.current().line, f"Условие while должно быть логическим, получен тип '{cond['type']}'")
         self.operator()
         self.ctx.skip_layout()
         self.ctx.consume(TokenType.KEYWORD.value, 'loop')
@@ -196,7 +203,6 @@ class Parser:
         self.ctx.consume(TokenType.SEPARATOR.value, '(')
         self.ctx.consume(TokenType.IDENTIFIER.value)
         while self.ctx.current() and self.ctx.current().value == ' ':
-            # Здесь нам нужно потребить реальный токен пробела, не пропуская его.
             self.ctx.consume(TokenType.SEPARATOR.value, ' ', skip=False)
             self.ctx.consume(TokenType.IDENTIFIER.value)
         self.ctx.consume(TokenType.SEPARATOR.value, ')')
@@ -282,7 +288,7 @@ class Parser:
     def multiplier(self):
         token = self.ctx.current()
         if not token:
-            raise SyntaxError(0, "Неожиданный конец файла")
+            raise SyntaxError("Неожиданный конец файла")
         if token.type == TokenType.IDENTIFIER.value:
             name = self.ctx.consume(TokenType.IDENTIFIER.value).value
             var_type = self.ctx.get_type(name)

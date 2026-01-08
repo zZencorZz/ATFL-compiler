@@ -5,6 +5,7 @@ from typing import List
 from tokens import KEYWORDS, SEPARATORS, Token, TokenType
 from lexer import Lexer
 from parser import Parser
+from errors import *
 
 def _get_token_code(tok: Token, lexer: Lexer) -> int:
     if tok.type == TokenType.KEYWORD:
@@ -16,6 +17,13 @@ def _get_token_code(tok: Token, lexer: Lexer) -> int:
     elif tok.type == TokenType.NUMBER:
         return lexer.TN.index(tok.value) + 1
     return 0
+
+def _display_separator(s: str) -> str:
+    if s == ' ':
+        return 'пробел'
+    if s == '\n':
+        return 'переход строки'
+    return s
 
 class App:
 
@@ -49,9 +57,6 @@ class App:
 
         ttk.Button(bar, text="Открыть", command=self._open).pack(side="left", padx=4, pady=4)
         ttk.Button(bar, text="Анализ", command=self._analyze).pack(side="left")
-
-        ttk.Separator(bar, orient="vertical").pack(side="left", fill="y", padx=8)
-        ttk.Label(bar, text="Лексер + Парсер + Семантика").pack(side="left")
 
     def _layout(self):
         self.panes = ttk.Panedwindow(self.root, orient="horizontal")
@@ -108,12 +113,9 @@ class App:
         tabs.add(tab_num, text="Числа")
 
         self._table(tab_kw, [(i + 1, w) for i, w in enumerate(KEYWORDS)])
-        self._table(tab_sep, [(i + 1, s) for i, s in enumerate(SEPARATORS)])
+        self._table(tab_sep, [(i + 1, _display_separator(s)) for i, s in enumerate(SEPARATORS)])
         self.tree_ti = self._table(tab_id, [])
         self.tree_tn = self._table(tab_num, [])
-
-        self.status = ttk.Label(self.root, text="Готово", style="Status.TLabel")
-        self.status.pack(side="bottom", fill="x")
 
     def _binds(self):
         self.input.bind("<KeyRelease>", self._update_lines)
@@ -171,7 +173,6 @@ class App:
                 self.input.delete("1.0", tk.END)
                 self.input.insert("1.0", f.read())
             self._update_lines()
-            self.status.config(text=f"Открыт файл: {path}")
         except Exception as e:
             messagebox.showerror("Ошибка", str(e))
 
@@ -212,7 +213,6 @@ class App:
             parser.parse()
 
             self.output.insert(tk.END, "\n✅ Успешно: лексика, синтаксис, семантика.\n")
-            self.status.config(text="Анализ завершён успешно")
 
         except Exception as e:
             self.output.delete("1.0", tk.END)
@@ -221,8 +221,6 @@ class App:
                 tk.END,
                 f"❌ Ошибка компиляции:\n{e}\n"
             )
-
-            self.status.config(text="Ошибка анализа")
 
     def _fill_demo(self):
         self.input.insert("1.0", """(* comment *)

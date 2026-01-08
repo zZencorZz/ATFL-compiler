@@ -1,6 +1,6 @@
 from tokens import *
 import struct
-from errors import LexError
+from errors import LexError, SyntaxError
 from typing import List
 
 class Lexer:
@@ -241,7 +241,7 @@ class Lexer:
                 bits = bin(value)[2:] # Преобразуем в биты
                 display = f"{bits} ({clean_raw})" # Форматируем вывод
         except Exception as e:
-            raise LexError(self.line, f"Ошибка при разборе числа {clean_raw}: {str(e)}")
+            raise LexError(self.line, f"Ошибка системы счисления при разборе числа {clean_raw}")
         
         if display not in self.TN:
             self.TN.append(display)
