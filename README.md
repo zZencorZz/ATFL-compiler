@@ -20,9 +20,10 @@
 ## 🚀 Установка и запуск
 ```bash
 git clone https://github.com/zZencorZz/ATFL-compiler.git
-cd ATFL-compiler
+cd ATFL-compiler/src
 
 python main.py
+
 ```
 
 ## 📂 Структура проекта
