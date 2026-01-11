@@ -15,7 +15,7 @@ class Context:
         peek_pos = self.pos + offset
         return self.tokens[peek_pos] if peek_pos < len(self.tokens) else None
 
-    def consume(self, type: str, value: Optional[str] = None):
+    def consume(self, type: str, value: Optional[str] = None, skip: bool = True):
         current_token = self.current()
         if not current_token:
             raise SyntaxError(0, "Неожиданный конец файла")
